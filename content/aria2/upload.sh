@@ -83,10 +83,8 @@ UPLOAD_FILE() {
         )
         if [ -f "${LOCAL_PATH}" ]; then
             curl -s -u ${GLOBAL_USER}:${GLOBAL_PASSWORD} -H "Content-Type: application/json" -f -X POST -d '{"srcFs":"'"${DOWNLOAD_DIR}"'","srcRemote":"'"${TASK_FILE_NAME}"'","dstFs":"'"${REMOTE_PATH}"'","dstRemote":"'"${TASK_FILE_NAME}"'","_async":"true"}' 'localhost:61802/operations/'${UPLOAD_MODE}'file'
-			rclone delete -v "${REMOTE_PATH}" --include "*.torrent" --drive-use-trash=false
         else
             curl -s -u ${GLOBAL_USER}:${GLOBAL_PASSWORD} -H "Content-Type: application/json" -f -X POST -d '{"srcFs":"'"${LOCAL_PATH}"'","dstFs":"'"${REMOTE_PATH}"'","_async":"true"}' 'localhost:61802/sync/'${UPLOAD_MODE}''
-			rclone delete -v "${REMOTE_PATH}" --include "*.torrent" --drive-use-trash=false
         fi
         RCLONE_EXIT_CODE=$?
         if [ ${RCLONE_EXIT_CODE} -eq 0 ]; then
@@ -116,6 +114,8 @@ DEFINITION_PATH
 CLEAN_UP
 if [ "${UPLOAD_MODE}" = "disable" ]; then
     echo "$(DATE_TIME) [INFO] Auto-upload to Rclone remote disabled"
+    exit 0
+elif  [[ -f "${LOCAL_PATH}" ]] && [[ "${TASK_FILE_NAME}" = *".torrent" ]]; then
     exit 0
 fi
 UPLOAD_FILE
